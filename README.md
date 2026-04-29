@@ -1,2 +1,2 @@
 # GuardianEye
-Blurring of civilian infrastructure in sattelite images
+Blurring of civilian infrastructure in satellite images
