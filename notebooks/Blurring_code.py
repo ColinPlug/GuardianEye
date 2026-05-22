@@ -1,13 +1,21 @@
 import cv2
 
-img = cv2.imread("./test.jpg")
+#functie die image omzet in een geblurde image binnen de bounding box
+def blur_img(img_path, bounding_box):
 
-blurred_img = cv2.GaussianBlur(img, (151, 151), 0)
+    img = cv2.imread(img_path)
 
-cv2.imwrite('test_blurred.jpg', blurred_img)
+    #YOLO bounding boxes worden in x, y, w en h gezet
+    x, y, w, h = bounding_box
+    roi = img[y : y + h, x : x + w]
 
-cv2.imshow('Origineel', img)
-cv2.imshow('Geblurd', blurred_img)
+    blurred_roi = cv2.GaussianBlur(roi, (151, 151), 0)
 
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    img[y : y + h, x : x + w] = blurred_roi
+
+    cv2.imwrite(img_path, img)
+    cv2.imshow("blurred image:", img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+blur_img("./notebooks/test_blurred.jpg", [50, 20, 400, 250])
