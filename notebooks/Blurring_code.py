@@ -18,4 +18,4 @@ def blur_img(img_path, bounding_box):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-blur_img("./notebooks/test_blurred.jpg", [50, 20, 400, 250])
+blur_img("./data/test_blurred.jpg", [50, 20, 400, 250])
