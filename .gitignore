@@ -219,5 +219,5 @@ __marimo__/
 
 # Data and models
 data/
-models/*.pt
+*.pt
 *.zip
