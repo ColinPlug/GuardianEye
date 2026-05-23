@@ -3,12 +3,11 @@ from ultralytics import YOLO
 
 # Laad het YOLO-model
 print("Laden van het AI-model... (Kan de eerste keer even duren)")
-model = YOLO("yolo26n-obb.pt") 
+model = YOLO("yolo26m-obb.pt") 
 
 # Definieer de klassen die als militair of civiel worden beschouwd
-MILITARY_IDS = [0, 1, 2, 7, 8, 11]
-CIVILIAN_IDS = [3, 4, 5, 6, 9, 10, 12, 13, 14]
-
+MILITARY_IDS = [0, 1, 2, 7, 8, 11] # plane, ship, storage tank, harbor, bridge, helicopter
+CIVILIAN_IDS = [3, 4, 5, 6, 9, 10, 12, 13, 14] # baseball diamond, tennis court, basketball court, ground track field, large vehicle, small vehicle, roundabout, soccer ball field, swimming pool
 
 def scan_image(image_path):
 
