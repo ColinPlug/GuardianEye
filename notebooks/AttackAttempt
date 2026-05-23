@@ -1,0 +1,42 @@
+import cv2
+import numpy as np
+from ultralytics import YOLO
+
+class ReIdentificationAttack: 
+    def __init__(self, model_path='yolov8n.pt'):
+        self.model = YOLO(model_path) #lichtgewicht model dat getraind is op algemene objecten
+    def preprocess_blurred_image(self, image_path):
+        """
+        Optimaliseert het geblurde plaatje om contouren scherper te maken voor de classifier
+        """
+        img = cv2.imread(image_path)
+        lab = cv2.cvtColor(img, cv2.Color_BGR2LAB)
+        l, a, b = cv2.split(lab)
+        clahe = cv2.createCLAHE(cliplimit = 3.0, titleGridSize(8,8))
+        cl = clahe.apply(l)
+        img_enhanced = cv2.merge((cl, a, b))
+        return cv2.cvtColor(img_enhanced, cv2.COLOR_LAB2BGR)
+
+    def attack(self, image_path):
+        """
+        Probeert geblurde plaatjes te identificeren
+        """
+        processed_img = self.preprocess_blurred_image(image_path)
+        # Voer detectie uit
+        results = self.model.predict(processed_img, conf=0.25)
+
+        for result in results:
+            for box in result.boxes:
+                cls_id = int(box.cls[0])
+                label = result.names[cls_id]
+                confidence = float(box.conf[0])
+
+                print(f"[Attack Success] Object herkend als: {label} ({confidence:.2%})")
+
+    res_plotted = results[0].plot()
+    cv2.imshow(""Re-identification Result", res_plotted)
+    cv2.waitKey(0)
+
+if __name__ == "__main__":
+    attacker = ReIdentificationAttack()
+    attacker.attack('image_from_attack.jpg')
