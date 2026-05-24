@@ -2,6 +2,8 @@ import os
 import glob
 import json
 import shutil
+import time
+import cv2
 
 try:
     from src.fase1_scanner import scan_image
@@ -13,9 +15,9 @@ except ModuleNotFoundError:
 # Setup functie om benodigde directories aan te maken
 def setup(base_path="data"):
     input_dir = os.path.join(base_path, "satellietbeelden")
-    downlink_dir = os.path.join(base_path, "downlink_payload")
-    images_dir = os.path.join(downlink_dir, "images")
-    metadata_dir = os.path.join(downlink_dir, "metadata")
+    payload_dir = os.path.join(base_path, "satelliet_payload")
+    images_dir = os.path.join(payload_dir, "afbeeldingen")
+    metadata_dir = os.path.join(payload_dir, "metadata")
 
     os.makedirs(input_dir, exist_ok=True)
     os.makedirs(images_dir, exist_ok=True)
@@ -54,37 +56,63 @@ def batch_processing():
         print(f"Geen data gevonden in {input_dir}.")
         return
     
-    print(f"\n Batch-processing voor {len(image_paths)} beelden gestart.")
-    print("-" * 50)
+    print(f"Batch-processing voor {len(image_paths)} beelden gestart.")
+
+    # Benchmarking variabelen
+    total_latency_inference = 0
+    total_latency_blurring = 0
+    total_latency_io_write = 0
+    total_images = len(image_paths)
+
+    # Start timer
+    start_pipeline = time.perf_counter()
 
     for path in image_paths:
         filename = os.path.basename(path)
         base_name = os.path.splitext(filename)[0]
         safe_img_filename = f"{base_name}_safe.png"
-        print(f"Verwerken van: {filename}")
+        print(f"Verwerken van beeld: {filename}")
+        
+        # Laad de afbeelding in als numpy array
+        img_array = cv2.imread(path)
 
         # Fase 1: Scannen op militaire doelen
-        military_targets, civilian_targets = scan_image(path)
+        t_start_inference = time.perf_counter()
+        military_targets, civilian_targets = scan_image(img_array, filename)
+        t_end_inference = time.perf_counter()
+        total_latency_inference += (t_end_inference - t_start_inference)
 
         # Fase 2: Anonimiseren van civiele doelen als die gevonden zijn
+        t_start_blurring = time.perf_counter()
         if civilian_targets:
-            print (f"{len(civilian_targets)} civiele doelen anonimiseren.")
-            
-            final_out = blur_img(path, civilian_targets, output_dir=images_dir)
-
-            print(f"Beeld geblurd en opgeslagen op: {final_out}")
+            final_out = blur_img(img_array, filename, civilian_targets, output_dir=images_dir)
         else:
-            print("Geen civiele doelen gevonden, geen blurring nodig.")
             final_out = os.path.join(images_dir, safe_img_filename)
             shutil.copy2(path, final_out)
-            print(f"Beeld gekopieerd naar: {final_out}")
+        t_end_blurring = time.perf_counter()
+        total_latency_blurring += (t_end_blurring - t_start_blurring)
 
         # Fase 3: Exporteren van metadata
+        t_start_io_write = time.perf_counter()
         export_metadata(filename, military_targets,  metadata_dir)
+        t_end_io_write = time.perf_counter()
+        total_latency_io_write += (t_end_io_write - t_start_io_write)
 
-        print("-" * 50)
+    # Eind timer
+    t_end_pipeline = time.perf_counter()
+    total_pipeline_time = t_end_pipeline - start_pipeline
+    fps = total_images / total_pipeline_time if total_pipeline_time > 0 else 0
 
-    print("\nBatch-processing voltooid.")
+    # Benchmarking resultaten
+    print("\n--- Benchmarking Resultaten ---")
+    print(f"Totale beelden verwerkt: {total_images}")
+    print(f"Totale pipeline tijd: {total_pipeline_time:.4f} seconden")
+    print(f"Gemiddelde fps: {fps:.2f} beelden/sec")
+    print("-" * 60)
+    print(f"Fase 1 (Inference) gemiddelde latency per beeld: {total_latency_inference / total_images:.4f} sec")
+    print(f"Fase 2 (Blurring) gemiddelde latency per beeld: {total_latency_blurring / total_images:.4f} sec")
+    print(f"Fase 3 (I/O Write) gemiddelde latency per beeld: {total_latency_io_write / total_images:.4f} sec")
+    print("-" * 60)
 
 if __name__ == "__main__":
     batch_processing()

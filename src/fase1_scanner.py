@@ -5,15 +5,15 @@ from ultralytics import YOLO
 print("Laden van het AI-model... (Kan de eerste keer even duren)")
 model = YOLO("yolo26m-obb.pt") 
 
-# Definieer de klassen die als militair of civiel worden beschouwd
+# Definieer de klassen die als militair of burger worden beschouwd
 MILITARY_IDS = [0, 1, 2, 7, 8, 11] # plane, ship, storage tank, harbor, bridge, helicopter
 CIVILIAN_IDS = [3, 4, 5, 6, 9, 10, 12, 13, 14] # baseball diamond, tennis court, basketball court, ground track field, large vehicle, small vehicle, roundabout, soccer ball field, swimming pool
 
-def scan_image(image_path):
+def scan_image(img_array, image_name="In-memory image"):
 
-    print(f"\nFoto analyseren: {image_path}")
+    print(f"\nFoto analyseren: {image_name}")
 
-    results = model(image_path, verbose=False)
+    results = model(img_array, verbose=False)
 
     military_targets = []
     civilian_targets = []
@@ -30,15 +30,15 @@ def scan_image(image_path):
 
     print("\n---GuardianEye Resultaten---")
     print(f"Aantal militaire objecten (Behouden): {len(military_targets)}")
-    print(f"Aantal civiele objecten (Klaar voor blurren): {len(civilian_targets)}")
+    print(f"Aantal burger objecten (Klaar voor blurren): {len(civilian_targets)}")
 
     return military_targets, civilian_targets
 
 if __name__ == "__main__":
     # Test de scanner met een voorbeeldafbeelding
     TEST_IMAGE = os.path.join("data", "satellietbeelden", "P0000.png")
-    military, civilians = scan_image(TEST_IMAGE)
+    military, civilians = scan_image(TEST_IMAGE, image_name="Testafbeelding P0000.png")
 
     if civilians:
-        print(f"Voorbeeld van een te blurren civiel object (ID {civilians[0]['id']})")
+        print(f"Voorbeeld van een te blurren burger object (ID {civilians[0]['id']})")
         print(f"Coördinaten: {civilians[0]['coords']}")
