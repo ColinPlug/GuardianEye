@@ -1,0 +1,28 @@
+# Git bestanden
+.git
+.gitignore
+
+# Python specifieke bestanden
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Data bestanden
+data/satellietbeelden_test/
+data/satellietbeelden_test_pool/
+data/satelliet_payload/
+data/inspectie_beelden/
+visuals/
+*.json
+!requirements.txt
+
+# OS bestanden
+.DS_Store
+Thumbs.db

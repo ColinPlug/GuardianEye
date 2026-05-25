@@ -217,7 +217,35 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# Data and models
-data/
-models/*.pt
+# Model, zip bestanden en afbeeldingen
+*.pt
 *.zip
+*.png
+
+# Data bestanden
+data/*
+!data/satellietbeelden
+data/satellietbeelden/*
+!data/satellietbeelden/.gitkeep
+
+!data/satellietbeelden_test/
+!data/satellietbeelden_test/*.png
+!data/satellietbeelden_test/ground_truth.json
+data/satellietbeelden_test/evaluation_results.json
+
+!data/satellietbeelden_test_pool/
+data/satellietbeelden_test_pool/*
+!data/satellietbeelden_test_pool/.gitkeep
+
+!data/satelliet_payload/
+data/satelliet_payload/afbeeldingen/*
+data/satelliet_payload/metadata/*
+!data/satelliet_payload/afbeeldingen/.gitkeep
+!data/satelliet_payload/metadata/.gitkeep
+
+!data/inspectie_beelden/
+data/inspectie_beelden/*
+!data/inspectie_beelden/.gitkeep
+
+visuals/*
+!visuals/.gitkeep
