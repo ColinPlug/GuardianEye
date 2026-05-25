@@ -62,7 +62,9 @@ def batch_processing():
     total_latency_inference = 0
     total_latency_blurring = 0
     total_latency_io_write = 0
-    total_images = len(image_paths)
+
+    images_processed_this_run = 0
+    images_skipped = 0
 
     # Start timer
     start_pipeline = time.perf_counter()
@@ -71,8 +73,16 @@ def batch_processing():
         filename = os.path.basename(path)
         base_name = os.path.splitext(filename)[0]
         safe_img_filename = f"{base_name}_safe.png"
+
+        expected_meta_path = os.path.join(metadata_dir, f"{base_name}_metadata.json")
+        if os.path.exists(expected_meta_path):
+            print(f"Skipping {filename}.")
+            images_skipped += 1
+            continue
+
         print(f"Verwerken van beeld: {filename}")
-        
+        images_processed_this_run += 1
+
         # Laad de afbeelding in als numpy array
         img_array = cv2.imread(path)
 
@@ -101,31 +111,44 @@ def batch_processing():
     # Eind timer
     t_end_pipeline = time.perf_counter()
     total_pipeline_time = t_end_pipeline - start_pipeline
-    fps = total_images / total_pipeline_time if total_pipeline_time > 0 else 0
+
+    if images_processed_this_run > 0:
+        fps = images_processed_this_run / total_pipeline_time
+        average_inference = total_latency_inference / images_processed_this_run
+        average_blurring = total_latency_blurring / images_processed_this_run
+        average_latency_io_write = total_latency_io_write / images_processed_this_run
+    else:
+        fps = average_inference = average_blurring = average_latency_io_write = 0.0
 
     # Benchmarking resultaten
     print("\n--- Benchmarking Resultaten ---")
-    print(f"Totale beelden verwerkt: {total_images}")
-    print(f"Totale pipeline tijd: {total_pipeline_time:.4f} seconden")
-    print(f"Gemiddelde fps: {fps:.2f} beelden/sec")
-    print("-" * 60)
-    print(f"Fase 1 (Inference) gemiddelde latency per beeld: {total_latency_inference / total_images:.4f} sec")
-    print(f"Fase 2 (Blurring) gemiddelde latency per beeld: {total_latency_blurring / total_images:.4f} sec")
-    print(f"Fase 3 (I/O Write) gemiddelde latency per beeld: {total_latency_io_write / total_images:.4f} sec")
-    print("-" * 60)
+    print(f"Totale beelden in map: {len(image_paths)}")
+    print(f"Beelden overgeslagen (Recovery): {images_skipped}")
+    print(f"Beelden verwerkt deze sessie: {images_processed_this_run}")
 
-    # Exporteren van latency resultaten naar JSON
-    latency_data = {
-        "total_images": total_images,
-        "total_pipeline_time": total_pipeline_time,
-        "average_latency_inference": total_latency_inference / total_images,
-        "average_latency_blurring": total_latency_blurring / total_images,
-        "average_latency_io_write": total_latency_io_write / total_images
-    }
+    if images_processed_this_run > 0:
+        print(f"Totale pipeline tijd: {total_pipeline_time:.4f} seconden")
+        print(f"Gemiddelde fps: {fps:.2f} beelden/sec")
+        print("-" * 60)
+        print(f"Fase 1 (Inference) gemiddelde latency per beeld: {average_inference:.4f} sec")
+        print(f"Fase 2 (Blurring) gemiddelde latency per beeld: {average_blurring:.4f} sec")
+        print(f"Fase 3 (I/O Write) gemiddelde latency per beeld: {average_latency_io_write:.4f} sec")
+        print("-" * 60)
 
-    latency_export_path = os.path.join("data", "latency_results.json")
-    with open(latency_export_path, "w", encoding="utf-8") as f:
-        json.dump(latency_data, f, indent=4)
+        # Exporteren van latency resultaten naar JSON
+        latency_data = {
+            "total_images": images_processed_this_run,
+            "total_pipeline_time": total_pipeline_time,
+            "average_latency_inference": average_inference,
+            "average_latency_blurring": average_blurring,
+            "average_latency_io_write": average_latency_io_write
+        }
+
+        latency_export_path = os.path.join("data", "latency_results.json")
+        with open(latency_export_path, "w", encoding="utf-8") as f:
+            json.dump(latency_data, f, indent=4)
+    else:
+        print("Geen nieuwe beelden verwerkt.")
 
 if __name__ == "__main__":
     batch_processing()
