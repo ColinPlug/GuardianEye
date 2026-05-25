@@ -34,7 +34,7 @@ docker-compose run --rm GuardianEye
 
 (Tip: Voeg de *--build* flag toe als je het project voor de allereerste keer opstart of na wijzigingen in de requirements.txt)
 
-## 4. Module Overzicht (C2 Menu)
+## 4. Module Overzicht
 
 Vanuit het terminal-menu heb je toegang tot de volgende modules:
 
@@ -50,10 +50,10 @@ Vanuit het terminal-menu heb je toegang tot de volgende modules:
 
 ## 5. Project Layout
 
-* */src/*: Core Python modules voor detectie en anonimisatie.
+* *src*: Core Python modules voor detectie en anonimisatie.
 
-* */evaluation/*: Academische evaluatie- en hackerscripts.
+* *evaluation*: Academische evaluatie- en hackerscripts.
 
-* */data/*: Hub voor input- en outputbeelden.
+* *data*: Hub voor input- en outputbeelden.
 
-* */visuals/*: Automatisch gegenereerde grafieken.
+* *visuals*: Automatisch gegenereerde grafieken.
