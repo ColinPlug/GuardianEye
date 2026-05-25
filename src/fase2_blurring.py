@@ -75,13 +75,13 @@ def visualize_results(image_array, filename, military_targets, civilian_targets,
     cv2.imwrite(output_path, img)
     print(f"Inspectie afbeelding opgeslagen in: {output_path}")
 
-    # Toon de afbeelding
-    window_name = "GuardianEye - Privacy vs. Bruikbaarheid Validatie"
-    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-    print("Beeld wordt weergegeven. Druk op een toets om door te gaan...")
-    cv2.imshow(window_name, img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # Toon de afbeelding (Uitgeschakeld voor Docker)
+    # window_name = "GuardianEye - Privacy vs. Bruikbaarheid Validatie"
+    # cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+    # print("Beeld wordt weergegeven. Druk op een toets om door te gaan...")
+    # cv2.imshow(window_name, img)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     try:

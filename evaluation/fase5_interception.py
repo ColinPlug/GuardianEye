@@ -1,7 +1,17 @@
 import cv2
 import numpy as np
 import os
+import sys
 import json
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = os.path.abspath(os.path.join(current_dir, ".."))
+if root_dir not in sys.path:
+    sys.path.append(root_dir)
+
+# Inladen scanner en visuele functie
+from src.fase1_scanner import scan_image
+from src.fase2_blurring import visualize_results
 
 def simulate_interception(base_filename, payload_dir="data/satelliet_payload"):
     print(f"Simulating interception for {base_filename}...")
@@ -54,17 +64,33 @@ def simulate_interception(base_filename, payload_dir="data/satelliet_payload"):
     attack_image = cv2.addWeighted(sharpened_image, 2.0, gaussian, -1.0, 0)
 
     # Output opslaan
-
     output_path = os.path.join(inspection_dir, f"intercepted_{base_name}.png")
     cv2.imwrite(output_path, attack_image)
 
-    # Toon de afbeelding
-    window_name = f"Interception Result: {base_name}"
-    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-    cv2.imshow(window_name, attack_image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # Toon de afbeelding (Uitgeschakeld voor Docker)
+    # window_name = f"Interception Result: {base_name}"
+    # cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+    # cv2.imshow(window_name, attack_image)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
+    # Test 3: AI identificatie poging
+    try:
+        mil_hacker, civ_hacker = scan_image(attack_image, image_name="Gereconstrueerde afbeelding")
+
+        print(f"AI Identificatie Resultaat: {mil_hacker} militaire doelen, {civ_hacker} burger doelen.")
+
+        if len(civ_hacker) == 0:
+            print("Geen burger doelen geïdentificeerd.")
+        else:
+            print("Hacker is de blur doorbroken! Burger doelen geïdentificeerd.")
+
+        # Sla scan poging op
+        visualize_results(attack_image, f"red_team_{base_name}.png", mil_hacker, civ_hacker, output_dir=inspection_dir)
+
+    except Exception as e:
+        print(f"Fout bij inladen AI scanner: {e}")
+        
 if __name__ == "__main__":
     DOELWIT = "P2684.png"
     simulate_interception(DOELWIT)

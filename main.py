@@ -114,5 +114,18 @@ def batch_processing():
     print(f"Fase 3 (I/O Write) gemiddelde latency per beeld: {total_latency_io_write / total_images:.4f} sec")
     print("-" * 60)
 
+    # Exporteren van latency resultaten naar JSON
+    latency_data = {
+        "total_images": total_images,
+        "total_pipeline_time": total_pipeline_time,
+        "average_latency_inference": total_latency_inference / total_images,
+        "average_latency_blurring": total_latency_blurring / total_images,
+        "average_latency_io_write": total_latency_io_write / total_images
+    }
+
+    latency_export_path = os.path.join("data", "latency_results.json")
+    with open(latency_export_path, "w", encoding="utf-8") as f:
+        json.dump(latency_data, f, indent=4)
+
 if __name__ == "__main__":
     batch_processing()

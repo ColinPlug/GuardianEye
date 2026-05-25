@@ -1,17 +1,16 @@
 import os
+import sys
 import json
 import glob
 import cv2
-import importlib.util
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-scanner_path = os.path.abspath(os.path.join(current_dir, "..", "src", "fase1_scanner.py"))
+root_dir = os.path.abspath(os.path.join(current_dir, ".."))
+if root_dir not in sys.path:
+    sys.path.append(root_dir)
 
 try:
-    spec = importlib.util.spec_from_file_location("fase1_scanner", scanner_path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    scan_image = module.scan_image
+    from src.fase1_scanner import scan_image
 except ModuleNotFoundError:
     print("ERROR: kan fase1_scanner niet importeren.")
     exit(0)

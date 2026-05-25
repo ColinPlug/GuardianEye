@@ -1,0 +1,9 @@
+services:
+  GuardianEye:
+    build: .
+    image: guardianeye_image
+    container_name: guardianeye_container
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/app
