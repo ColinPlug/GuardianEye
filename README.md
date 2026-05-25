@@ -32,7 +32,7 @@ Het systeem wordt bestuurd via een interface. Start de architectuur op met één
 docker-compose run --rm GuardianEye
 ```
 
-(Tip: Voeg de *--build* flag toe als je het project voor de allereerste keer opstart of na wijzigingen in de requirements.txt)
+(Voeg de *--build* flag toe als je het project voor de allereerste keer opstart of na wijzigingen in de requirements.txt)
 
 ## 4. Module Overzicht
 
